@@ -67,10 +67,10 @@ node('node') {
          sh 'rm node_modules -rf'
 
          mail body: 'project build successful',
-                     from: 'xxxx@yyyyy.com',
-                     replyTo: 'xxxx@yyyy.com',
+                     from: 'krisspelns@gmail.com',
+                     replyTo: 'krisspelns@gmail.com',
                      subject: 'project build successful',
-                     to: 'yyyyy@yyyy.com'
+                     to: 'krisspelnsy@gmail.com'
        }
 
 
@@ -81,10 +81,10 @@ node('node') {
         currentBuild.result = "FAILURE"
 
             mail body: "project build error is here: ${env.BUILD_URL}" ,
-            from: 'xxxx@yyyy.com',
-            replyTo: 'yyyy@yyyy.com',
+            from: 'krisspelnsy@gmail.com',
+            replyTo: 'krisspelnsy@gmail.com',
             subject: 'project build failed',
-            to: 'zzzz@yyyyy.com'
+            to: 'krisspelnsy@gmail.com'
 
         throw err
     }
