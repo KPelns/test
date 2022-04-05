@@ -1,93 +1,67 @@
-#!groovy
+pipeline {
+    
+     agent any
+     stages {
+             
+        stage('Input') {
+            steps{
+              script {
+                        env.USERNAME = input message: 'Please enter the username',
+                                parameters: [string(defaultValue: '',
+                                            description: '',
+                                             name: 'Name: ')]
 
-/*
-The MIT License
-Copyright (c) 2015-, CloudBees, Inc., and a number of other of contributors
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
-
-node('node') {
-
-
-    currentBuild.result = "SUCCESS"
-
-    try {
-
-       stage('Checkout'){
-
-          checkout scm
-       }
-
-       stage('Test'){
-
-         env.NODE_ENV = "test"
-
-         print "Environment will be : ${env.NODE_ENV}"
-
-         sh 'node -v'
-         sh 'npm prune'
-         sh 'npm install'
-         sh 'npm test'
-
-       }
-
-       stage('Build Docker'){
-
-            sh './dockerBuild.sh'
-       }
-
-       stage('Deploy'){
-
-         echo 'Push to Repo'
-         sh './dockerPushToRepo.sh'
-
-         echo 'ssh to web server and tell it to pull new image'
-         sh 'ssh deploy@xxxxx.xxxxx.com running/xxxxxxx/dockerRun.sh'
-
-       }
-
-       stage('Cleanup'){
-
-         echo 'prune and cleanup'
-         sh 'npm prune'
-         sh 'rm node_modules -rf'
-
-         mail body: 'project build successful',
-                     from: 'xxxx@yyyyy.com',
-                     replyTo: 'xxxx@yyyy.com',
-                     subject: 'project build successful',
-                     to: 'yyyyy@yyyy.com'
-       }
-
-
-
+        }
+            
+               
+                     input('Do you want to proceed?')
+                             
     }
-    catch (err) {
+        }
+              
+         stage('Upload to AWS!') {
+              steps {
+                  withAWS(region:'eu-west-1',credentials:'endijs') {
+                  sh 'echo "Uploading content with AWS creds"'
+                  s3Upload(pathStyleAccessEnabled: true, payloadSigningEnabled: true, file:'second-stack.yaml', bucket:'spainisdivi')
+                  }
+              }
+         }
+     
+     }
+     
+     post {
 
-        currentBuild.result = "FAILURE"
+        success {
+            echo 'I succeeded!'
+        }
 
-            mail body: "project build error is here: ${env.BUILD_URL}" ,
-            from: 'xxxx@yyyy.com',
-            replyTo: 'yyyy@yyyy.com',
-            subject: 'project build failed',
-            to: 'zzzz@yyyyy.com'
 
-        throw err
-    }
+        aborted {
+        withCredentials([gitUsernamePassword(credentialsId: '123', gitToolName: 'Default')]) {      
+        echo "Hello, you aborted the mission ${env.USERNAME}!"
+      
+            
+            sh '''
+            git branch -D revert
+            git checkout main
+            git pull origin main 
+            git checkout -b revert
+            git revert -m 1 HEAD
+            git checkout main
+            git merge revert
+            
+ 
+            git push origin main
+            
+            '''
+        }
+        }
+        } 
+        
+    
+}
+
 
 }
 © 2022 GitHub, Inc.
