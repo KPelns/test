@@ -47,7 +47,7 @@
               Ref: "AWS::StackName"
           -
             Key: "Network"
-            Value: "Public"
+            Value: "Public"  
           -
             Key: "Name"
             Value: !Ref 'VPCName'
@@ -207,7 +207,7 @@
         VpcId:
           Ref: "VPC"
         Tags:
-          -
+          -a
             Key: "Application"
             Value:
               Ref: "AWS::StackName"
