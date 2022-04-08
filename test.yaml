@@ -48,7 +48,7 @@ Resources:
   FirstEC2Instance:
     Type: "AWS::EC2::Instance"
     Properties:
-      IamInstanceProfile: SSMRole
+      IamInstanceProfile: SSMRole 
       ImageId: "ami-0db188056a6ff81ae"
       KeyName: student
       InstanceType:
