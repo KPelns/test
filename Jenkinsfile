@@ -33,7 +33,7 @@ pipeline {
      post {
 
         success {
-            echo 'I succeeded!'
+            echo 'LETS GOOOO'
         }
 
 
